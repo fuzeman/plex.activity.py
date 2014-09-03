@@ -4,15 +4,22 @@ from plex_activity.sources.s_logging.parsers import NowPlayingParser, ScrobblePa
 from asio import ASIO
 from asio.file import SEEK_ORIGIN_CURRENT
 from io import BufferedReader
+import inspect
 import logging
 import os
+import platform
 import time
 
 log = logging.getLogger(__name__)
 
-# TODO PATH_HINTS
-PATH_HINTS = [
-]
+PATH_HINTS = {
+    'Linux': [
+        '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Logs/Plex Media Server.log'
+    ],
+    'Windows': [
+        lambda: os.path.join(os.getenv('LOCALAPPDATA'), 'Plex Media Server\\Logs\\Plex Media Server.log')
+    ]
+}
 
 
 class Logging(Source):
@@ -122,7 +129,21 @@ class Logging(Source):
         if cls.path:
             return cls.path
 
-        cls.path = PATH_HINTS[0][1][0]
+        hints = PATH_HINTS.get(platform.system())
+
+        if hints is None:
+            log.warn('Unknown system, unable to find log path')
+            return None
+
+        for hint in hints:
+            if inspect.isfunction(hint):
+                hint = hint()
+
+            log.debug('Testing if "%s" exists', hint)
+
+            if os.path.exists(hint):
+                cls.path = hint
+                break
 
         log.debug('path = "%s"' % cls.path)
         return cls.path
