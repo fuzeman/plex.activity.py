@@ -25,8 +25,9 @@ PATH_HINTS = {
 class Logging(Source):
     name = 'logging'
     events = [
-        'logging.action.scrobble',
         'logging.playing',
+        'logging.action.played',
+        'logging.action.unplayed'
     ]
 
     parsers = []

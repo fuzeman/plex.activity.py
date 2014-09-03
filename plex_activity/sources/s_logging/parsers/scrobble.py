@@ -9,7 +9,8 @@ class ScrobbleParser(Parser):
     regex = re.compile(pattern, re.IGNORECASE)
 
     events = [
-        'logging.action.scrobble'
+        'logging.action.played',
+        'logging.action.unplayed'
     ]
 
     def __init__(self, main):
@@ -23,12 +24,15 @@ class ScrobbleParser(Parser):
         if not match:
             return False
 
-        self.emit('logging.action.scrobble', {
+        action = match.group('action')
+        if not action:
+            return False
+
+        self.emit('logging.action.%s' % action, {
             'account_key': match.group('account_key'),
             'rating_key': match.group('rating_key'),
 
-            'title': match.group('title'),
-            'action': match.group('action'),
+            'title': match.group('title')
         })
 
         return True
