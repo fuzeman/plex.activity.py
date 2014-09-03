@@ -1,3 +1,4 @@
+from plex import Plex
 from plex_activity.sources.base import Source
 from plex_activity.sources.s_logging.parsers import NowPlayingParser, ScrobbleParser
 
@@ -106,9 +107,8 @@ class Logging(Source):
                     log.debug("Log file moved (probably rotated), closing")
                     self.close()
                 elif ping:
-                    # TODO Ping server to see if server is still active
-                    # PlexMediaServer.get_info(quiet=True)
-
+                    # Ping server to see if server is still active
+                    Plex.detail()
                     ping = False
 
             time.sleep(stale_sleep)
