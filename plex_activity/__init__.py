@@ -1,3 +1,4 @@
-from plex_activity.activity import Activity
+from plex_activity import activity
 
-__all__ = ['Activity']
+# Global objects (using defaults)
+Activity = activity.Activity()

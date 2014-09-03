@@ -6,13 +6,32 @@ import websocket
 
 log = logging.getLogger(__name__)
 
+TIMELINE_STATES = {
+    0: 'created',
+    2: 'matching',
+    3: 'downloading',
+    4: 'loading',
+    5: 'finished',
+    6: 'analyzing',
+    9: 'deleted'
+}
+
 
 class WebSocket(Source):
     name = 'websocket'
     events = [
         'websocket.playing',
+
         'websocket.notification.progress',
-        'websocket.notification.status'
+        'websocket.notification.status',
+
+        'websocket.timeline.created',
+        'websocket.timeline.matching',
+        'websocket.timeline.downloading',
+        'websocket.timeline.loading',
+        'websocket.timeline.finished',
+        'websocket.timeline.analyzing',
+        'websocket.timeline.deleted'
     ]
 
     opcode_data = (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY)
@@ -90,15 +109,31 @@ class WebSocket(Source):
         # Pre-process message (if function exists)
         process_func = getattr(self, 'process_%s' % type, None)
 
-        if process_func and process_func(type, info):
+        if process_func and process_func(info):
             return True
 
         # Emit raw message
         self.emit_notification('%s.notification.%s' % (self.name, type), info)
         return True
 
-    def process_playing(self, type, info):
+    def process_playing(self, info):
         self.emit_notification('%s.playing' % self.name, info)
+        return True
+
+    def process_timeline(self, info):
+        children = info.get('_children', [])
+
+        if not children:
+            return False
+
+        for entry in children:
+            state = TIMELINE_STATES.get(entry.get('state'))
+
+            if not state:
+                continue
+
+            self.emit('%s.timeline.%s' % (self.name, state), entry)
+
         return True
 
     def emit_notification(self, name, info):
