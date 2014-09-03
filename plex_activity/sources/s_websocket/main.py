@@ -10,9 +10,9 @@ log = logging.getLogger(__name__)
 class WebSocket(Source):
     name = 'websocket'
     events = [
-        'notification.playing',
-        'notification.progress',
-        'notification.status'
+        'websocket.playing',
+        'websocket.notification.progress',
+        'websocket.notification.status'
     ]
 
     opcode_data = (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY)
@@ -90,17 +90,23 @@ class WebSocket(Source):
         # Pre-process message (if function exists)
         process_func = getattr(self, 'process_%s' % type, None)
 
-        if process_func and process_func(info):
+        if process_func and process_func(type, info):
             return True
 
         # Emit raw message
+        self.emit_notification('%s.notification.%s' % (self.name, type), info)
+        return True
+
+    def process_playing(self, type, info):
+        self.emit_notification('%s.playing' % self.name, info)
+        return True
+
+    def emit_notification(self, name, info):
         children = info.get('_children', [])
 
         if len(children) > 1:
-            self.emit('notification.%s' % type, children)
+            self.emit(name, children)
         elif len(children) == 1:
-            self.emit('notification.%s' % type, children[0])
+            self.emit(name, children[0])
         else:
-            self.emit('notification.%s' % type, info)
-
-        return True
+            self.emit(name, info)

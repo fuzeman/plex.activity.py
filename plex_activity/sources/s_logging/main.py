@@ -18,7 +18,7 @@ PATH_HINTS = [
 class Logging(Source):
     name = 'logging'
     events = [
-        'action.scrobble',
+        'logging.action.scrobble',
         'logging.playing',
     ]
 
