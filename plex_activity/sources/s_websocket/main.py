@@ -192,5 +192,7 @@ class WebSocket(Source):
             self.emit(name, children)
         elif len(children) == 1:
             self.emit(name, children[0])
-        else:
+        elif info:
             self.emit(name, info)
+        else:
+            self.emit(name)
