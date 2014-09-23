@@ -53,6 +53,9 @@ class NowPlayingParser(Parser):
             log.warn('Unknown activity type "%s"', activity_type)
             return True
 
+        if match is None:
+            match = {}
+
         # Extend match with query info
         self.query(match, header_match.group('query'))
 
@@ -97,8 +100,9 @@ class NowPlayingParser(Parser):
 
     def progress(self):
         data = self.read_parameters()
+
         if not data:
-            return None
+            return {}
 
         # Translate parameters into timeline-style form
         return {
