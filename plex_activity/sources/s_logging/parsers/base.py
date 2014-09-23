@@ -60,7 +60,7 @@ class Parser(Emitter):
         return info
 
     def process(self, line):
-        raise NotImplementError()
+        raise NotImplementedError()
 
     @staticmethod
     def parameter_match(line):
