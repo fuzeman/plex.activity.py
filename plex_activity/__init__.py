@@ -10,5 +10,5 @@ try:
 
     # Global objects (using defaults)
     Activity = activity.Activity()
-except Exception, ex:
+except Exception as ex:
     log.warn('Unable to import submodules - %s', ex)
