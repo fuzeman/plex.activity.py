@@ -19,8 +19,8 @@ setup(
         'plex.py',
         'plex.metadata.py',
 
-        'asio'
-        'pyemitter'
+        'asio',
+        'pyemitter',
         'websocket-client'
     ],
 
