@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 log = logging.getLogger(__name__)
 
@@ -11,4 +12,4 @@ try:
     # Global objects (using defaults)
     Activity = activity.Activity()
 except Exception as ex:
-    log.warn('Unable to import submodules - %s', ex)
+    log.warn('Unable to import submodules: %s - %s', ex, traceback.format_exc())

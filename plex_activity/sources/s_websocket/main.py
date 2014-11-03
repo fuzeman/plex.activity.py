@@ -101,8 +101,8 @@ class WebSocket(Source):
 
         try:
             info = json.loads(data)
-        except Exception, e:
-            log.warn('Error decoding message from websocket: %s' % e)
+        except Exception as ex:
+            log.warn('Error decoding message from websocket: %s' % ex)
             log.debug(data)
             return False
 
