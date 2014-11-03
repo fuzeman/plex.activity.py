@@ -1,3 +1,5 @@
 *.pyc
 /dist
 /plex.activity.py.egg-info
+
+/build
