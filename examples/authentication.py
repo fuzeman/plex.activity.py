@@ -8,6 +8,12 @@ from plex_metadata import Metadata
 
 
 if __name__ == '__main__':
+    # Set authentication token
+    Plex.configuration.defaults.authentication(
+        raw_input('Authentication token: ')
+    )
+
+    # Bind events
     @Activity.on('websocket.playing')
     def ws_playing(info):
         print "[websocket.playing]", info

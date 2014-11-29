@@ -1,5 +1,7 @@
+from plex import Plex
 from plex_activity.sources.base import Source
 
+from urllib import urlencode
 import json
 import logging
 import re
@@ -51,9 +53,23 @@ class WebSocket(Source):
         self.pipe(self.events, activity)
 
     def connect(self):
-        self.ws = websocket.create_connection('ws://127.0.0.1:32400/:/websockets/notifications')
+        uri = 'ws://%s:%s/:/websockets/notifications' % (
+            Plex.configuration.get('server.host', '127.0.0.1'),
+            Plex.configuration.get('server.port', 32400)
+        )
 
-        log.info('Connected to notification websocket')
+        params = {}
+
+        # Set authentication token (if one is available)
+        if Plex.configuration['authentication.token']:
+            params['X-Plex-Token'] = Plex.configuration['authentication.token']
+
+        # Append parameters to uri
+        if params:
+            uri += '?' + urlencode(params)
+
+        # Create websocket connection
+        self.ws = websocket.create_connection(uri)
 
     def run(self):
         self.connect()
