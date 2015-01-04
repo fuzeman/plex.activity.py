@@ -1,6 +1,6 @@
 from plex_activity import __version__
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='plex.activity.py',
@@ -12,15 +12,15 @@ setup(
     author_email='me@dgardiner.net',
 
     description='Real-time activity extension for plex.py',
-    packages=['plex_activity'],
+    packages=find_packages(exclude=['tests']),
     platforms='any',
 
     install_requires=[
         'plex.py',
         'plex.metadata.py',
 
-        'asio'
-        'pyemitter'
+        'asio',
+        'pyemitter',
         'websocket-client'
     ],
 

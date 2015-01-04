@@ -1,8 +1,9 @@
 import logging
+import traceback
 
 log = logging.getLogger(__name__)
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 
 try:
@@ -10,5 +11,5 @@ try:
 
     # Global objects (using defaults)
     Activity = activity.Activity()
-except Exception, ex:
-    log.warn('Unable to import submodules - %s', ex)
+except Exception as ex:
+    log.warn('Unable to import submodules: %s - %s', ex, traceback.format_exc())
