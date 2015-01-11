@@ -148,9 +148,6 @@ class Logging(Source):
             return None
 
         for hint in hints:
-            if inspect.isfunction(hint):
-                hint = hint()
-
             log.debug('Testing if "%s" exists', hint)
 
             if os.path.exists(hint):
@@ -183,7 +180,20 @@ class Logging(Source):
         else:
             log.info('Unable to retrieve "LocalAppDataPath" from server')
 
-        return hints_global + hints_system
+        hints = []
+
+        for hint in (hints_global + hints_system):
+            # Resolve hint function
+            if inspect.isfunction(hint):
+                hint = hint()
+
+            # Check for duplicate
+            if hint in hints:
+                continue
+
+            hints.append(hint)
+
+        return hints
 
     @classmethod
     def test(cls):
