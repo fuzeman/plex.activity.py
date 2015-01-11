@@ -137,10 +137,10 @@ class Logging(Source):
         if cls.path:
             return cls.path
 
-        hints = PATH_HINTS.get(platform.system())
+        hints = cls.get_hints()
 
-        if hints is None:
-            log.warn('Unknown system, unable to find log path')
+        if not hints:
+            log.warn('Unable to find any hints for "%s", operating system not supported', platform.system())
             return None
 
         for hint in hints:
@@ -156,6 +156,19 @@ class Logging(Source):
         log.debug('path = "%s"' % cls.path)
         return cls.path
 
+    @classmethod
+    def get_hints(cls):
+        hints = PATH_HINTS.get(platform.system(), [])
+
+        # Retrieve hint from server preferences (if available)
+        data_path = Plex[':/prefs'].get('LocalAppDataPath')
+
+        if data_path:
+            hints.insert(0, os.path.join(data_path.value, "Plex Media Server", "Logs", "Plex Media Server.log"))
+        else:
+            log.info('Unable to retrieve "LocalAppDataPath" from server')
+
+        return hints
 
     @classmethod
     def test(cls):
