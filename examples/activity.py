@@ -5,9 +5,15 @@ from plex import Plex
 from plex_activity import Activity
 from plex_metadata import Metadata
 
+import os
+
 
 
 if __name__ == '__main__':
+    Plex.configuration.defaults.authentication(
+        os.environ.get('PLEXTOKEN')
+    )
+
     @Activity.on('websocket.playing')
     def ws_playing(info):
         print "[websocket.playing]", info
