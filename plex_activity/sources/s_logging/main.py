@@ -39,7 +39,9 @@ class Logging(Source):
     ]
 
     parsers = []
+
     path = None
+    path_hints = PATH_HINTS
 
     def __init__(self, activity):
         super(Logging, self).__init__()
@@ -139,6 +141,8 @@ class Logging(Source):
 
         hints = cls.get_hints()
 
+        log.debug('hints: %r', hints)
+
         if not hints:
             log.warn('Unable to find any hints for "%s", operating system not supported', platform.system())
             return None
@@ -157,18 +161,29 @@ class Logging(Source):
         return cls.path
 
     @classmethod
+    def add_hint(cls, path, system=None):
+        if system not in cls.path_hints:
+            cls.path_hints[system] = []
+
+        cls.path_hints[system].append(path)
+
+    @classmethod
     def get_hints(cls):
-        hints = PATH_HINTS.get(platform.system(), [])
+        # Retrieve system hints
+        hints_system = PATH_HINTS.get(platform.system(), [])
+
+        # Retrieve global hints
+        hints_global = PATH_HINTS.get(None, [])
 
         # Retrieve hint from server preferences (if available)
         data_path = Plex[':/prefs'].get('LocalAppDataPath')
 
         if data_path:
-            hints.insert(0, os.path.join(data_path.value, "Plex Media Server", "Logs", "Plex Media Server.log"))
+            hints_global.append(os.path.join(data_path.value, "Plex Media Server", "Logs", "Plex Media Server.log"))
         else:
             log.info('Unable to retrieve "LocalAppDataPath" from server')
 
-        return hints
+        return hints_global + hints_system
 
     @classmethod
     def test(cls):
