@@ -86,9 +86,15 @@ class Logging(Source):
 
     def read_line(self):
         if not self.file:
-            self.file = ASIO.open(self.get_path(), opener=False)
+            path = self.get_path()
+            if not path:
+                raise Exception('Unable to find the location of "Plex Media Server.log"')
+
+            # Open file
+            self.file = ASIO.open(path, opener=False)
             self.file.seek(self.file.get_size(), SEEK_ORIGIN_CURRENT)
 
+            # Create buffered reader
             self.reader = BufferedReader(self.file)
 
             self.path = self.file.get_path()
