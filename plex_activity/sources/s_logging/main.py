@@ -170,7 +170,7 @@ class Logging(Source):
         log.debug('hints: %r', hints)
 
         if not hints:
-            log.warn('Unable to find any hints for "%s", operating system not supported', platform.system())
+            log.error('Unable to find any hints for "%s", operating system not supported', platform.system())
             return None
 
         for hint in hints:
@@ -180,7 +180,15 @@ class Logging(Source):
                 cls.path = hint
                 break
 
-        log.debug('path = "%s"' % cls.path)
+        if cls.path:
+            log.debug('Using the path: %r', cls.path)
+        else:
+            log.error('Unable to find a valid path for "Plex Media Server.log"', extra={
+                'data': {
+                    'hints': hints
+                }
+            })
+
         return cls.path
 
     @classmethod
