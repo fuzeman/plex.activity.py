@@ -132,11 +132,27 @@ class Logging(Source):
         if not self.file:
             return
 
-        self.reader.close()
-        self.reader = None
+        try:
+            # Close the buffered reader
+            self.reader.close()
+        except Exception, ex:
+            log.error('reader.close() - raised exception: %s', ex, exc_info=True)
+        finally:
+            self.reader = None
 
-        self.file.close()
-        self.file = None
+        try:
+            # Close the file handle
+            self.file.close()
+        except OSError, ex:
+            if ex.errno == 9:
+                # Bad file descriptor, already closed?
+                log.warn('file.close() - ignoring raised exception: %s (already closed)', ex)
+            else:
+                log.error('file.close() - raised exception: %s', ex, exc_info=True)
+        except Exception, ex:
+            log.error('file.close() - raised exception: %s', ex, exc_info=True)
+        finally:
+            self.file = None
 
     @classmethod
     def get_path(cls):
