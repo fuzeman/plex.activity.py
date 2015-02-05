@@ -1,3 +1,16 @@
+0.6.2 (2015-02-05)
+------------------
+**Changes**
+ - Wrap activity threads to catch any exceptions
+ - [logging] implemented automatic path discovery
+ - [logging] added path hint for QNAP TS-219P
+ - [logging] added path hint for FreeNAS 9.3
+ - [logging] updated messages/exceptions when "Plex Media Server.log" can't be found
+
+**Fixed**
+ - Python 3.x compatibility issues
+ - [logging] catch reader/file close() exceptions (already closed, etc..)
+
 0.6.1 (2015-01-04)
 ------------------
  - Added support for authentication tokens
