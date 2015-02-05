@@ -17,7 +17,15 @@ PATH_HINTS = {
     'Darwin': [
         lambda: os.path.join(os.getenv('HOME'), 'Library/Logs/Plex Media Server.log')
     ],
+    'FreeBSD': [
+        # FreeNAS 9.3
+        '/usr/pbi/plexmediaserver-amd64/plexdata/Plex Media Server/Logs/Plex Media Server.log',
+    ],
     'Linux': [
+        # QNAP TS-219P
+        '/share/HDA_DATA/.qpkg/PlexMediaServer/Library/Plex Media Server/Logs/Plex Media Server.log',
+
+        # Ubuntu 12.04
         '/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Logs/Plex Media Server.log'
     ],
     'Windows': [
@@ -35,7 +43,9 @@ class Logging(Source):
     ]
 
     parsers = []
+
     path = None
+    path_hints = PATH_HINTS
 
     def __init__(self, activity):
         super(Logging, self).__init__()
@@ -76,9 +86,15 @@ class Logging(Source):
 
     def read_line(self):
         if not self.file:
-            self.file = ASIO.open(self.get_path(), opener=False)
+            path = self.get_path()
+            if not path:
+                raise Exception('Unable to find the location of "Plex Media Server.log"')
+
+            # Open file
+            self.file = ASIO.open(path, opener=False)
             self.file.seek(self.file.get_size(), SEEK_ORIGIN_CURRENT)
 
+            # Create buffered reader
             self.reader = BufferedReader(self.file)
 
             self.path = self.file.get_path()
@@ -122,36 +138,96 @@ class Logging(Source):
         if not self.file:
             return
 
-        self.reader.close()
-        self.reader = None
+        try:
+            # Close the buffered reader
+            self.reader.close()
+        except Exception as ex:
+            log.error('reader.close() - raised exception: %s', ex, exc_info=True)
+        finally:
+            self.reader = None
 
-        self.file.close()
-        self.file = None
+        try:
+            # Close the file handle
+            self.file.close()
+        except OSError as ex:
+            if ex.errno == 9:
+                # Bad file descriptor, already closed?
+                log.warn('file.close() - ignoring raised exception: %s (already closed)', ex)
+            else:
+                log.error('file.close() - raised exception: %s', ex, exc_info=True)
+        except Exception as ex:
+            log.error('file.close() - raised exception: %s', ex, exc_info=True)
+        finally:
+            self.file = None
 
     @classmethod
     def get_path(cls):
         if cls.path:
             return cls.path
 
-        hints = PATH_HINTS.get(platform.system())
+        hints = cls.get_hints()
 
-        if hints is None:
-            log.warn('Unknown system, unable to find log path')
+        log.debug('hints: %r', hints)
+
+        if not hints:
+            log.error('Unable to find any hints for "%s", operating system not supported', platform.system())
             return None
 
         for hint in hints:
-            if inspect.isfunction(hint):
-                hint = hint()
-
             log.debug('Testing if "%s" exists', hint)
 
             if os.path.exists(hint):
                 cls.path = hint
                 break
 
-        log.debug('path = "%s"' % cls.path)
+        if cls.path:
+            log.debug('Using the path: %r', cls.path)
+        else:
+            log.error('Unable to find a valid path for "Plex Media Server.log"', extra={
+                'data': {
+                    'hints': hints
+                }
+            })
+
         return cls.path
 
+    @classmethod
+    def add_hint(cls, path, system=None):
+        if system not in cls.path_hints:
+            cls.path_hints[system] = []
+
+        cls.path_hints[system].append(path)
+
+    @classmethod
+    def get_hints(cls):
+        # Retrieve system hints
+        hints_system = PATH_HINTS.get(platform.system(), [])
+
+        # Retrieve global hints
+        hints_global = PATH_HINTS.get(None, [])
+
+        # Retrieve hint from server preferences (if available)
+        data_path = Plex[':/prefs'].get('LocalAppDataPath')
+
+        if data_path:
+            hints_global.append(os.path.join(data_path.value, "Plex Media Server", "Logs", "Plex Media Server.log"))
+        else:
+            log.info('Unable to retrieve "LocalAppDataPath" from server')
+
+        hints = []
+
+        for hint in (hints_global + hints_system):
+            # Resolve hint function
+            if inspect.isfunction(hint):
+                hint = hint()
+
+            # Check for duplicate
+            if hint in hints:
+                continue
+
+            hints.append(hint)
+
+        return hints
 
     @classmethod
     def test(cls):
