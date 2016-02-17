@@ -63,7 +63,7 @@ class Logging(Source):
     def run(self):
         line = self.read_line_retry(ping=True, stale_sleep=0.5)
         if not line:
-            log.warn('Unable to read log file')
+            log.info('Unable to read log file')
             return
 
         log.debug('Ready')
@@ -75,7 +75,7 @@ class Logging(Source):
             if line:
                 self.process(line)
             else:
-                log.warn('Unable to read log file')
+                log.info('Unable to read log file')
 
     def process(self, line):
         for parser in self.parsers:
