@@ -1,5 +1,6 @@
+*.iml
 *.pyc
-/dist
-/plex.activity.py.egg-info
 
 /build
+/dist
+/plex.activity.py.egg-info
