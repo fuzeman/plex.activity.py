@@ -19,4 +19,4 @@
 
 0.6.0 (2014-10-30)
 ------------------
-- Initial release
+ - Initial release
