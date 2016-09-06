@@ -1,4 +1,4 @@
-from plex.lib.six import add_metaclass
+from plex.lib import six as six
 from plex.lib.six.moves import xrange
 from plex_activity.sources import Logging, WebSocket
 
@@ -17,7 +17,7 @@ class ActivityMeta(type):
         return None
 
 
-@add_metaclass(ActivityMeta)
+@six.add_metaclass(ActivityMeta)
 class Activity(Emitter):
     registered = []
 
@@ -25,8 +25,11 @@ class Activity(Emitter):
         self.available = self.get_available(sources)
         self.enabled = []
 
-    def start(self):
+    def start(self, sources=None):
         # TODO async start
+
+        if sources is not None:
+            self.available = self.get_available(sources)
 
         # Test methods until an available method is found
         for weight, source in self.available:
