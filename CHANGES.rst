@@ -1,3 +1,14 @@
+0.7.0 (2016-09-06)
+------------------
+**Added**
+ - :code:`Activity.start()` method now accepts a list of "sources" to use
+
+**Changed**
+ - Reduced severity of some common logger messages
+ - Logging
+     - Updated path hints for FreeBSD and FreeNAS
+     - Updated activity parser patterns
+
 0.6.2 (2015-02-05)
 ------------------
 **Changes**
