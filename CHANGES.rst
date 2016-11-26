@@ -1,3 +1,8 @@
+0.7.1 (2016-11-26)
+------------------
+**Changed**
+ - Updated the websocket message parser to support PMS 1.3.0+
+
 0.7.0 (2016-09-06)
 ------------------
 **Added**
